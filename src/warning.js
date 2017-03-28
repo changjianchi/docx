@@ -1,34 +1,41 @@
 /**
  * @file warning.js
  * @author schoeu
- * 邮件报警实现
+ * @description 邮件报警实现
  * */
-var nodemailer = require('nodemailer');
-var CONF = require('../docx-conf.json');
-if (CONF.smtps) {
 
-}
-var transporter = nodemailer.createTransport({
-    host: CONF.warningEmail.host,
-    port: CONF.warningEmail.port,
-    auth: {
-        user: CONF.warningEmail.user,
-        pass: CONF.warningEmail.pass
-    }
-});
+var config = require('./config');
+var warnEmail = config.get('warningEmail');
+var waringFlag = config.get('waringFlag');
 
-function sendMail(content) {
-    var mailOptions = {
-        from: CONF.warningEmail.from,
-        to: CONF.warningEmail.to,
-        subject: CONF.warningEmail.subject,
-        text: content || ''
-    };
-    transporter.sendMail(mailOptions, function(error, info){
-        if(error){
-            console.log(error);
+if (waringFlag) {
+    var nodemailer = require('nodemailer');
+
+    /**
+     * 发送邮件
+     *
+     * @param {string} content 邮件内容,支持html
+     * */
+    exports.sendMail = function (content) {
+        if (warnEmail) {
+            var transporter = nodemailer.createTransport({
+                host: warnEmail.host,
+                port: warnEmail.port,
+                auth: {
+                    user: warnEmail.user,
+                    pass: warnEmail.pass
+                }
+            });
+
+            var mailOptions = {
+                from: warnEmail.from,
+                to: warnEmail.to,
+                subject: warnEmail.subject,
+                text: content || ''
+            };
+            transporter.sendMail(mailOptions, function (error) {
+                // 错误处理
+            });
         }
-    });
+    };
 }
-
-exports.sendMail = sendMail;
